@@ -9,7 +9,7 @@ import utils
 
 torch.set_default_dtype(torch.float64)
 
-plt.rcParams.update({"text.usetex": True, "font.size": 20, "axes.grid": True})
+plt.rcParams.update({"text.usetex": True, "font.size": 22, "axes.grid": True})
 
 p = ArgumentParser()
 p.add_argument(
@@ -99,28 +99,28 @@ ax.plot(
     f_vals_agd - min_val,
     label="AGD",
     lw=3.5,
-    alpha=0.8,
+    alpha=0.9,
 )
 ax.plot(
     [0] + np.cumsum(N).tolist(),
     (f_vals_dhfaeg_avg - min_val).clamp_min_(torch.tensor(0.0)),
     label="dHFA-eg (avg)",
-    marker=".",
+    marker="o",
     lw=3.5,
-    markersize=12,
-    alpha=0.8,
+    markersize=10,
+    alpha=0.9,
+    markeredgecolor="grey",
 )
 ax.plot(
     [0] + np.cumsum(N).tolist(),
     (f_vals_dhfaeg_savg - min_val).clamp_min_(torch.tensor(0.0)),
     label="dHFA-eg (s-avg)",
-    marker=".",
+    marker="*",
     lw=3.5,
-    markersize=12,
-    alpha=0.8,
+    markersize=10,
+    alpha=0.9,
+    markeredgecolor="grey",
 )
-
-ax.legend()
 ax.set_yscale("log")
 ax.set_xlabel("Number of iterations $K$")
 ax.set_ylabel(r"$f(x_{K}) - f^{\star}$")
