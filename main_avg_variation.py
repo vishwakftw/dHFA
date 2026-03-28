@@ -18,7 +18,7 @@ p.add_argument(
     help="Number of samples",
 )
 p.add_argument("--d", type=int, help="Number of dimensions")
-p.add_argument("--alpha", type=float, help="Regularisation parameter")
+p.add_argument("--beta", type=float, help="Regularisation parameter")
 p.add_argument("--seed", type=int, default=1729, help="Seed for reproducibility")
 p.add_argument("--total_iters", type=int, help="Number of iterations")
 p.add_argument("--lam", type=float, default=(1 + 3**0.5) / 2, help="Lambda parameter")
@@ -31,19 +31,19 @@ x_0 = torch.zeros(args.d)
 match args.expt_type:
     case "lin-reg":
         f, X, y = utils.make_linear_regression(
-            N=args.N, d=args.d, alpha=args.alpha, seed=args.seed
+            N=args.N, d=args.d, alpha=args.beta, seed=args.seed
         )
         eigvals_XTX = torch.linalg.eigvalsh(X.T @ X).clamp_min_(torch.tensor(0.0))
         L, m = (
-            eigvals_XTX.max() / args.N + args.alpha,
-            eigvals_XTX.min() / args.N + args.alpha,
+            eigvals_XTX.max() / args.N + args.beta,
+            eigvals_XTX.min() / args.N + args.beta,
         )
 
     case "log-reg":
         f, X, y = utils.make_logistic_regression(
-            N=args.N, d=args.d, alpha=args.alpha, seed=args.seed
+            N=args.N, d=args.d, alpha=args.beta, seed=args.seed
         )
-        L, m = 1, args.alpha
+        L, m = 1, args.beta
     case _:
         raise ValueError
 
@@ -77,7 +77,7 @@ x_agd_sol, f_vals_agd = agd.run(x_0=x_0, K=args.total_iters, momentum=momentum)
 
 if args.expt_type == "lin-reg":
     min_val = f(
-        torch.linalg.solve(X.T @ X + args.N * args.alpha * torch.eye(args.d), X.T @ y)
+        torch.linalg.solve(X.T @ X + args.N * args.beta * torch.eye(args.d), X.T @ y)
     )
     ylims = {"bottom": 1e-15}
 
@@ -110,6 +110,7 @@ ax.plot(
     markersize=10,
     alpha=0.9,
     markeredgecolor="grey",
+    markevery=2,
 )
 ax.plot(
     [0] + np.cumsum(N).tolist(),
@@ -120,12 +121,13 @@ ax.plot(
     markersize=10,
     alpha=0.9,
     markeredgecolor="grey",
+    markevery=2,
 )
 ax.set_yscale("log")
-ax.set_xlabel("Number of iterations $K$")
+ax.set_xlabel(r"\# of iterations / integration steps")
 ax.set_ylabel(r"$f(x_{K}) - f^{\star}$")
 ax.set_ylim(**ylims)
 plt.tight_layout()
 plt.savefig(
-    f"avg-var-{args.expt_type}-alpha={args.alpha},N={args.N},d={args.d},seed={args.seed}.pdf"
+    f"avg-var-{args.expt_type}-beta={args.beta},N={args.N},d={args.d},seed={args.seed}.pdf"
 )
